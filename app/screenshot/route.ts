@@ -5,6 +5,8 @@ export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
 	const url = searchParams.get("url");
 
+	console.log('screenshot', url, searchParams);
+
 	if (!url) {
 		return NextResponse.json(
 			{ error: "URL parameter is required" },
