@@ -29,9 +29,9 @@ export async function GET(request: Request) {
 		};
 
 		return new Response(screenshot, init);
-	} catch (error) {
+	} catch (error: any) {
 		return NextResponse.json(
-			{ error: "Something went wrong" },
+			{ error: error.message },
 			{ status: 200 }
 		);
 	} finally {
