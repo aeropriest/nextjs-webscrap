@@ -7,5 +7,5 @@ export async function GET(request: Request) {
 
 	console.log('screenshot', url, searchParams);
 
-	return NextResponse.json({ url });
+	return NextResponse.json({ url: "hello world" });
 }

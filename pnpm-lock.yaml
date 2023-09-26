@@ -6,6 +6,7 @@ specifiers:
   '@types/react-dom': 18.2.4
   autoprefixer: 10.4.14
   cheerio: ^1.0.0-rc.12
+  chrome-aws-lambda: ^10.1.0
   eslint: 8.40.0
   eslint-config-next: 13.4.2
   next: 13.4.2
@@ -23,6 +24,7 @@ dependencies:
   '@types/react-dom': 18.2.4
   autoprefixer: 10.4.14_postcss@8.4.23
   cheerio: 1.0.0-rc.12
+  chrome-aws-lambda: 10.1.0_puppeteer-core@21.3.4
   eslint: 8.40.0
   eslint-config-next: 13.4.2_3qfatcekpgbllh6uk5ivyhkbxq
   next: 13.4.2_biqbaboplfbrettd7655fr4n2y
@@ -773,6 +775,16 @@ packages:
       readdirp: 3.6.0
     optionalDependencies:
       fsevents: 2.3.3
+    dev: false
+
+  /chrome-aws-lambda/10.1.0_puppeteer-core@21.3.4:
+    resolution: {integrity: sha512-NZQVf+J4kqG4sVhRm3WNmOfzY0OtTSm+S8rg77pwePa9RCYHzhnzRs8YvNI6L9tALIW6RpmefWiPURt3vURXcw==}
+    engines: {node: '>= 10.16'}
+    peerDependencies:
+      puppeteer-core: ^10.1.0
+    dependencies:
+      lambdafs: 2.1.1
+      puppeteer-core: 21.3.4
     dev: false
 
   /chromium-bidi/0.4.16_f7dybp27m2lwxoiedcwgx5655a:
@@ -2102,6 +2114,14 @@ packages:
     dependencies:
       json-buffer: 3.0.1
     dev: false
+
+  /lambdafs/2.1.1:
+    resolution: {integrity: sha512-x5k8JcoJWkWLvCVBzrl4pzvkEHSgSBqFjg3Dpsc4AcTMq7oUMym4cL/gRTZ6VM4mUMY+M0dIbQ+V1c1tsqqanQ==}
+    engines: {node: '>= 10.16'}
+    hasBin: true
+    dev: false
+    bundledDependencies:
+      - tar-fs
 
   /language-subtag-registry/0.3.22:
     resolution: {integrity: sha512-tN0MCzyWnoz/4nHS6uxdlFWoUZT7ABptwKPQ52Ea7URk6vll88bWBVhodtnlfEuCcKWNGoc+uGbw1cwa9IKh/w==}
