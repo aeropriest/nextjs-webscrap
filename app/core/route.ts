@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 			{ status: 400 }
 		);
 	}
-	let browser;
+	let browser: undefined;
 	try {
 		// browser = await puppeteer.launch();
 		const browser = await puppeteer.connect({
@@ -34,6 +34,7 @@ export async function GET(request: Request) {
 			},
 		};
 
+		await browser.close();
 		return new Response(screenshot, init);
 	} catch (error: any) {
 		return NextResponse.json(
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
 		);
 	} finally {
 		if (browser) {
-			await browser.close();
+			// await browser.close();
 		}
 	}
 }
