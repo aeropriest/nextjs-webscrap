@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import puppeteer from "puppeteer";
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -6,5 +7,5 @@ export async function GET(request: Request) {
 
 	console.log('screenshot', url, searchParams);
 
-	return NextResponse.json({ text: "hello world" });
+	return NextResponse.json({ url });
 }
