@@ -1,37 +1,7 @@
 import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
-const chrome = require("chrome-aws-lambda")
-
-const exePath =
-  process.platform === "win32"
-    ? "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-    : process.platform === "linux"
-    ? "/usr/bin/google-chrome"
-    : "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-
-const getOptions = async () => {
-  let options
-  if (process.env.NODE_ENV === "production") {
-    options = {
-      args: chrome.args,
-      executablePath: await chrome.executablePath,
-      headless: chrome.headless,
-    }
-  } else {
-    options = {
-      args: [],
-      executablePath: exePath,
-      headless: true,
-    }
-  }
-  return options
-}
-
-const sleep = (ms) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
-}
+import chromium from "chrome-aws-lambda";
+import fs from "fs";
 
 
 export async function GET(request: Request) {
@@ -39,75 +9,86 @@ export async function GET(request: Request) {
 	const url = searchParams.get("url");
 
 	console.log('screenshot', url, searchParams);
+	
+	const executablePath = await chromium.executablePath;
 
+	const randomId = Math.random().toString(36).substring(2, 15);
+  
+	const imagePath = `/tmp/screenshot-${randomId}.jpg`;
+  
+	const getScreenshot = async (url: string) => {
+	  console.log("Get screenshot", new Date());
+	  const browser = await chromium.puppeteer.launch({
+		args: [
+		  ...chromium.args,
+		  "--autoplay-policy=user-gesture-required",
+		  "--disable-background-networking",
+		  "--disable-background-timer-throttling",
+		  "--disable-backgrounding-occluded-windows",
+		  "--disable-breakpad",
+		  "--disable-client-side-phishing-detection",
+		  "--disable-component-update",
+		  "--disable-default-apps",
+		  "--disable-dev-shm-usage",
+		  "--disable-domain-reliability",
+		  "--disable-extensions",
+		  "--disable-features=AudioServiceOutOfProcess",
+		  "--disable-hang-monitor",
+		  "--disable-ipc-flooding-protection",
+		  "--disable-notifications",
+		  "--disable-offer-store-unmasked-wallet-cards",
+		  "--disable-popup-blocking",
+		  "--disable-print-preview",
+		  "--disable-prompt-on-repost",
+		  "--disable-renderer-backgrounding",
+		  "--disable-setuid-sandbox",
+		  "--disable-speech-api",
+		  "--disable-sync",
+		  "--hide-scrollbars",
+		  "--ignore-gpu-blacklist",
+		  "--metrics-recording-only",
+		  "--mute-audio",
+		  "--no-default-browser-check",
+		  "--no-first-run",
+		  "--no-pings",
+		  "--no-sandbox",
+		  "--no-zygote",
+		  "--password-store=basic",
+		  "--use-gl=swiftshader",
+		  "--use-mock-keychain",
+		],
+		executablePath,
+		headless: true,
+	  });
+  
+	  const page = await browser.newPage();
+  
+	  try {
+		await page.goto(url, { waitUntil: "networkidle2" });
+	  } catch (error) {
+		console.log("Error", error);
+	  }
+  
+	  await page.setViewport({ height: 1280, width: 1280 });
+  
+	  const screenshot = await page.screenshot({ type: "png" });
+	  await browser.close();
+	  return screenshot;
+	};
+  
+	
+	const screenshot = await getScreenshot(url||'https://www.google.com/');
+	const init = {
+		headers: {
+			"Content-Type": "image/png",
+		},
+	};
+
+	return new Response(screenshot, init);
+
+  
 	return NextResponse.json({ url });
-
-	if (!url) {
-		return NextResponse.json(
-			{ error: "URL parameter is required" },
-			{ status: 400 }
-		);
-	}
-	let browser: undefined;
-	return NextResponse.json({ text:"text" });
-	try {
-		console.log("configuring chrome...")
-		const options = await getOptions()
   
-		console.log("launching browser...", options)
-		const browser = await puppeteer.launch(options)
-  
-		console.log("opening new page...")
-		const page = await browser.newPage()
-  
-		console.log("setting request interception...")
-		await page.setRequestInterception(true)
-		page.on("request", (request) => {
-		  const reqType = request.resourceType()
-		  if (reqType === "document") {
-			request.continue()
-		  } else if (process.env.NODE_ENV === "development") {
-			request.continue()
-		  } else {
-			console.log("block request type: " + request.resourceType())
-			request.abort()
-		  }
-		})
-  
-		console.log("navigating to " + url + "...")
-		await page.goto(url, { timeout: 0 }).then(async (response) => {
-		  console.log("url loaded") //WORKS FINE
-		})
-  
-		if (process.env.NODE_ENV === "development") {
-		  await sleep(4000)
-		  console.log("add delay for javascript update")
-		}
-  
-		console.log("get page content...")
-  
-		const html =
-		  process.env.NODE_ENV === "development"
-			? await page.content()
-			: await page.evaluate(() => {
-				return document.querySelector("body").innerHTML
-			  })
-  
-		console.log("parse html...", html);
-		const text = await page.$eval("*", (el: any) => el.innerText)
-		console.log("closing browser...")
-		await browser.close()
-  
-		console.log("done.")
-		return NextResponse.json({ text });
-	} catch (error: any) {
-		return NextResponse.json(
-			{ error: error.message },
-			{ status: 200 }
-		);
-	} finally {
-		if (browser) {
-			// await browser.close();
-		}
-	}
+	// res.writeHead(200, { "Content-Type": "image/jpeg" });
+	// res.end(img, "binary");
 }
